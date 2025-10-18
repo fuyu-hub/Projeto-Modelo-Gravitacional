@@ -68,6 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     initializeEmptyTables(5);
+    validateAllCells();
+    setResultsOutdated(false);
 });
 
 function showPane(paneId) {
@@ -91,39 +93,86 @@ function showPane(paneId) {
 function toggleSpinner(show) {
     AppState.isAnalysisRunning = show;
     document.getElementById('loading-spinner')?.classList.toggle('d-none', !show);
-    document.getElementById('analise-nav-link')?.classList.toggle('disabled', show);
+    // document.getElementById('analise-nav-link')?.classList.toggle('disabled', show); // Removido daqui, validateAllCells vai cuidar disso
 
     const runButton = document.getElementById('run-analysis-button');
     if (runButton) {
-        runButton.disabled = show;
+        runButton.disabled = show; // O botão fica desabilitado ENQUANTO roda
         runButton.innerHTML = show
             ? `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Executando...`
             : `<i class="bi bi-play-circle-fill me-2"></i>Executar Análise Completa`;
     }
+
+    // Adiciona a chamada aqui
+    validateAllCells(); // Reavalia o estado dos botões/links após o spinner mudar
 }
 
 function setResultsOutdated(isOutdated) {
-    document.getElementById('results-outdated-indicator')?.classList.toggle('d-none', !isOutdated);
-    document.getElementById('export-button').disabled = isOutdated;
+    const resultsLink = document.getElementById('analise-nav-link');
+    const exportButton = document.getElementById('export-button');
+    const linksToToggle = ['interactive-nav-link', 'dashboard-nav-link', 'analysis-tools-nav-link'];
+
+    // Mostra/Esconde o indicador de aviso (!) APENAS se uma análise já foi feita E está desatualizado
+    document.getElementById('results-outdated-indicator')?.classList.toggle('d-none', !(isOutdated && AppState.hasAnalysisRun));
+
+    // Desabilita exportação se desatualizado OU se nenhuma análise foi feita
+    if (exportButton) {
+        exportButton.disabled = isOutdated || !AppState.hasAnalysisRun;
+    }
+
+    // Habilita/Desabilita o link "Resultados"
+    if (resultsLink) {
+        // Desabilita se está desatualizado OU se nenhuma análise foi feita
+        const shouldDisable = isOutdated || !AppState.hasAnalysisRun;
+        resultsLink.classList.toggle('disabled', shouldDisable);
+        if (shouldDisable) {
+            resultsLink.classList.remove('active');
+        }
+    }
+
+    // Habilita/Desabilita os outros links dependentes
+    linksToToggle.forEach(id => {
+        const link = document.getElementById(id);
+        if (link) {
+            const shouldDisable = isOutdated || !AppState.hasAnalysisRun;
+            link.classList.toggle('disabled', shouldDisable);
+            if (shouldDisable) {
+                link.classList.remove('active');
+            }
+        }
+    });
 }
 
 function validateAllCells() {
     const cells = document.querySelectorAll('.editable-table .form-control-plaintext');
     let allValid = true;
     cells.forEach(cell => {
-        if (!cell.validity.valid || cell.value.trim() === '' || parseFloat(cell.value) < 0) {
+        const value = cell.value.trim();
+        const numValue = parseFloat(value);
+        if (!cell.validity.valid || value === '' || isNaN(numValue) || numValue < 0) {
             allValid = false;
+            cell.classList.add('is-invalid');
+        } else {
+             cell.classList.remove('is-invalid');
         }
     });
 
     const runButton = document.getElementById('run-analysis-button');
-    if (runButton) runButton.disabled = !allValid && !AppState.isAnalysisRunning;
 
-    if (!AppState.isAnalysisRunning) {
-        ['analise-nav-link', 'interactive-nav-link', 'dashboard-nav-link', 'analysis-tools-nav-link'].forEach(id => {
-            document.getElementById(id)?.classList.toggle('disabled', !allValid);
-        });
+    // Habilita/Desabilita APENAS o botão principal de análise
+    if (runButton) {
+        // Desabilita se não for válido OU se uma análise já estiver rodando
+        runButton.disabled = !allValid || AppState.isAnalysisRunning;
     }
+
+    // NÃO mais habilita/desabilita os links aqui diretamente
+
+    // // Se os dados são inválidos E a aba de entrada de dados não está ativa,
+    // // força a exibição da aba de entrada de dados. (Opcional manter)
+    // const dataPaneActive = document.getElementById('data-pane').classList.contains('active');
+    // if (!allValid && !dataPaneActive && !AppState.isAnalysisRunning) {
+    //     showPane('data-pane');
+    // }
 
     return allValid;
 }
@@ -131,12 +180,16 @@ function validateAllCells() {
 function addValidationListeners() {
     document.querySelectorAll('.editable-table .form-control-plaintext').forEach(cell => {
         cell.addEventListener('input', (e) => {
-            const isValid = e.target.validity.valid && e.target.value.trim() !== '' && parseFloat(e.target.value) >= 0;
-            e.target.classList.toggle('is-invalid', !isValid);
             e.target.classList.add('cell-modified');
+
+            // --- Adicionado aqui ---
+            // Se uma análise já foi feita, qualquer edição desatualiza os resultados
             if (AppState.hasAnalysisRun) {
-                setResultsOutdated(true);
+                setResultsOutdated(true); // Isso vai desabilitar o link 'Resultados'
             }
+            // --- Fim da adição ---
+
+            // Chama a validação GERAL (que agora só afeta o botão Executar)
             validateAllCells();
         });
     });
@@ -223,6 +276,9 @@ function initializeEmptyTables(numZonas) {
 }
 
 function populateEditableData(data) {
+    // Reseta o estado, pois novos dados foram carregados/inicializados
+    AppState.hasAnalysisRun = false; // Importante para a lógica do setResultsOutdated
+
     AppState.zoneCount = data.zonas.length;
     AppState.resistanceNames = data.resistance_names;
     const odTable = document.getElementById('od-table');
@@ -243,9 +299,8 @@ function populateEditableData(data) {
     });
 
     addValidationListeners();
-    validateAllCells();
     clearModifiedStatus();
-    if (AppState.hasAnalysisRun) setResultsOutdated(true);
+    validateAllCells();
 }
 
 function updateZoneNames(element, rowIndex) {
@@ -282,7 +337,7 @@ function runInteractiveScenario() {
 
 function displayResults(results) {
     AppState.results = results;
-    AppState.hasAnalysisRun = true;
+    AppState.hasAnalysisRun = true; // Marca que uma análise já foi executada
 
     buildSummaryTable(results.summary_data);
 
@@ -290,12 +345,25 @@ function displayResults(results) {
     scenarioButtonsContainer.innerHTML = results.detailed_scenarios.map((scenario, index) => `<button class="nav-link ${index === 0 ? 'active' : ''}" onclick="displayScenario(${index})">${scenario.Cenário}</button>`).join('');
 
     displayScenario(0);
+    // As chamadas para buildDashboard e populateToolSelectors já foram removidas
 
-    document.getElementById('export-button').disabled = false;
-    toggleSpinner(false);
-    clearModifiedStatus();
+    document.getElementById('export-button').disabled = false; // Habilita exportação
+    toggleSpinner(false); // Esconde o spinner
+    clearModifiedStatus(); // Remove marcação de células modificadas
+
+    // --- Adicionado/Modificado aqui ---
+    // Marca os resultados como NÃO desatualizados e HABILITA os links
     setResultsOutdated(false);
-    showPane('analise-pane');
+    // Garante especificamente que o link 'Resultados' está habilitado
+    document.getElementById('analise-nav-link')?.classList.remove('disabled');
+    // Habilita também os outros links dependentes (se necessário no futuro)
+    const linksToEnable = ['interactive-nav-link', 'dashboard-nav-link', 'analysis-tools-nav-link'];
+    linksToEnable.forEach(id => {
+         document.getElementById(id)?.classList.remove('disabled');
+    });
+    // --- Fim da modificação ---
+
+    showPane('analise-pane'); // Mostra a aba de resultados
 }
 
 function buildSummaryTable(data) {
