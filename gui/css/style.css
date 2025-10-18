@@ -1,0 +1,226 @@
+/* gui/css/style.css */
+
+body {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.sidebar {
+    flex: 0 0 280px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    transition: background-color 0.2s ease-in-out;
+}
+
+.nav-item-header {
+    padding: 0.75rem 1rem 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.nav-link {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+    border-left: 3px solid transparent;
+    color: var(--text-color);
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    transition: color 0.2s, background-color 0.2s, border-left 0.2s;
+}
+
+.sidebar .nav-link.active, .sidebar .nav-link:hover {
+    color: var(--primary-action-color) !important;
+    background-color: rgba(13, 110, 253, 0.1);
+}
+.nav-pills .nav-link.active {
+    border-left-color: var(--primary-action-color);
+}
+
+.nav-link.disabled {
+    color: #6c757d;
+    cursor: not-allowed;
+    background-color: transparent !important;
+    border-left-color: transparent !important;
+}
+
+.main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    position: relative;
+}
+
+.content-pane {
+    display: none;
+    padding: 2.5rem;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.content-pane.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid transparent;
+    box-shadow: 0 4px 20px rgba(0,0,0,.05);
+    border-radius: 1rem;
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    --bs-card-cap-padding-y: 1rem;
+    --bs-card-cap-padding-x: 1.5rem;
+    --bs-card-spacer-y: 1.5rem;
+    --bs-card-spacer-x: 1.5rem;
+}
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--border-color);
+}
+html[data-bs-theme='dark'] .card {
+    box-shadow: 0 4px 25px rgba(0,0,0,.1);
+    border: 1px solid var(--border-color);
+}
+
+/* --- Table & Heatmap Styles --- */
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-border-color: var(--border-color);
+    text-align: center;
+    vertical-align: middle;
+}
+.editable-table th, .heatmap-table th {
+    vertical-align: middle;
+}
+.editable-table td input {
+    text-align: center;
+}
+
+.heatmap-table { border-collapse: separate; border-spacing: 2px; width: 100%; table-layout: fixed; }
+.heatmap-table th { color: var(--text-muted-custom); font-weight: 500; padding: 0.5em; text-align: center; }
+.heatmap-table td {
+    font-weight: 500;
+    cursor: pointer;
+    aspect-ratio: 1;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 4px;
+    transition: transform 0.1s ease-out, box-shadow 0.2s, background-color 0.2s, color 0.2s; /* Adicionado color */
+    padding: 0.2em;
+    font-size: 0.9em;
+}
+.heatmap-table td:hover { transform: scale(1.1); z-index: 10; position:relative; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+
+#heatmap-tooltip { position: fixed; backdrop-filter: blur(5px); padding: 12px; border-radius: 8px; pointer-events: none; z-index: 1001; font-size: 0.9em; box-shadow: 0 5px 15px rgba(0,0,0,0.2); border: 1px solid var(--border-color); visibility: hidden; opacity: 0; transition: opacity 0.2s, visibility 0.2s; }
+html[data-bs-theme='dark'] #heatmap-tooltip { background: rgba(43, 48, 53, 0.85); color: #fff; }
+html[data-bs-theme='light'] #heatmap-tooltip { background: rgba(255, 255, 255, 0.85); color: #000; }
+#heatmap-tooltip.active { visibility: visible; opacity: 1; }
+#heatmap-tooltip hr { margin: 8px 0; border-top: 1px solid var(--border-color); }
+
+.heatmap-legend {
+    width: 100%;
+    height: 10px;
+    background: linear-gradient(to right, hsl(120, 85%, 50%), hsl(60, 85%, 60%), hsl(0, 85%, 50%));
+    border-radius: 5px;
+}
+
+/* --- Editable Table Styles --- */
+.editable-table .form-control-plaintext { background-color: transparent; border: 2px solid transparent; border-radius: 4px; transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s; padding: 0.25rem; }
+.editable-table .form-control-plaintext:hover { background-color: var(--input-hover-bg); }
+.editable-table .form-control-plaintext:focus { background-color: var(--input-focus-bg); border-color: var(--primary-action-color); box-shadow: none; color: var(--text-color); }
+.editable-table .form-control-plaintext.is-invalid { border-color: var(--invalid-color) !important; background-color: rgba(220, 53, 69, 0.1); }
+.editable-table .form-control-plaintext.cell-modified { box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.5) inset; }
+
+/* --- Notification Toast --- */
+.toast-container { z-index: 2000; }
+.toast {
+    backdrop-filter: blur(10px);
+    background-color: rgba(var(--bs-body-bg-rgb), 0.85);
+    border: 1px solid var(--border-color);
+}
+.toast .btn-close { --bs-btn-close-color: var(--bs-body-color); }
+.toast.bg-danger { background-color: rgba(var(--bs-danger-rgb), 0.9) !important; color: white !important; }
+.toast.bg-danger .btn-close { --bs-btn-close-color: white; }
+
+/* --- Estilos para Ferramentas e Dashboard --- */
+.heatmap-legend-diff {
+    width: 100%;
+    height: 10px;
+    background: var(--diff-legend-gradient);
+    border-radius: 5px;
+}
+
+.chart-container, .histogram {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 0;
+}
+
+.bar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bar-label {
+    flex-basis: 120px;
+    flex-shrink: 0;
+    text-align: right;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bar {
+    height: 20px;
+    background-color: var(--primary-action-color);
+    border-radius: 0.25rem;
+    transition: width 0.5s ease-in-out;
+    opacity: 0.8;
+}
+
+.bar-value {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.histogram {
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: flex-end;
+    height: 150px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hist-bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.hist-bar {
+    width: 70%;
+    background-color: var(--secondary-action-color);
+    border-radius: 0.25rem 0.25rem 0 0;
+    transition: height 0.5s ease-in-out;
+    opacity: 0.7;
+}
+
+.hist-label {
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+}

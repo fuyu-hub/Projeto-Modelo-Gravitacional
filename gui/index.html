@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Modelo Gravitacional</title>
+    <link href="assets/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="heatmap-tooltip"></div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="notification-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div id="notification-icon" class="toast-body fs-4"></div>
+            <div id="notification-text" class="toast-body flex-grow-1"></div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<nav class="sidebar">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0"><i class="bi bi-compass-fill me-2 text-primary"></i>Modelo Grav.</h3>
+        <button id="theme-toggler" class="btn btn-outline-secondary border-0 fs-5" onclick="toggleTheme()" title="Alterar tema">
+            <i class="bi bi-moon-stars-fill"></i>
+        </button>
+    </div>
+
+    <ul class="nav flex-column nav-pills">
+        <li class="nav-item-header small text-muted text-uppercase mb-2">Dados</li>
+        <li class="nav-item"><a class="nav-link active" href="#" onclick="showPane('data-pane')"><i class="bi bi-database-fill me-2"></i>Dados de Entrada</a></li>
+        <li class="nav-item">
+            <a class="nav-link disabled" href="#" id="analise-nav-link" onclick="showPane('analise-pane')">
+                <i class="bi bi-graph-up-arrow me-2"></i>Resultados
+                <i id="results-outdated-indicator" class="bi bi-exclamation-triangle-fill text-warning d-none ms-2" title="Os dados foram alterados. Execute a análise novamente."></i>
+            </a>
+        </li>
+        <li class="nav-item"><a class="nav-link disabled" href="#" id="interactive-nav-link" onclick="showPane('interactive-pane')"><i class="bi bi-sliders me-2"></i>Cenário Interativo</a></li>
+
+        <li class="nav-item-header small text-muted text-uppercase mt-4 mb-2">Análise</li>
+        <li class="nav-item"><a class="nav-link disabled" href="#" id="dashboard-nav-link" onclick="showPane('dashboard-pane')"><i class="bi bi-bar-chart-line-fill me-2"></i>Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link disabled" href="#" id="analysis-tools-nav-link" onclick="showPane('analysis-tools-pane')"><i class="bi bi-clipboard-data-fill me-2"></i>Ferramentas</a></li>
+
+        <li class="nav-item-header small text-muted text-uppercase mt-4 mb-2">Sistema</li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="showPane('settings-pane')"><i class="bi bi-gear-fill me-2"></i>Configurações</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="showPane('about-pane')"><i class="bi bi-info-circle-fill me-2"></i>Sobre</a></li>
+    </ul>
+    <div class="mt-auto">
+        <div id="loading-spinner" class="d-flex align-items-center justify-content-center d-none mb-3">
+            <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+            <span class="ms-2 text-muted small">Executando...</span>
+        </div>
+        <hr/>
+        <p class="text-body-secondary small mb-0 text-center">Pressione F11 para tela cheia.</p>
+    </div>
+</nav>
+
+<main class="main-content">
+    <div id="data-pane" class="content-pane active">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+             <h2 class="mb-0">Configuração de Dados</h2>
+             <button id="run-analysis-button" class="btn btn-success btn-lg shadow-sm" onclick="runFullAnalysis()">
+                <i class="bi bi-play-circle-fill me-2"></i>Executar Análise Completa
+            </button>
+        </div>
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0"><i class="bi bi-folder2 me-2"></i>Gestão de Dados</h5></div>
+            <div class="card-body">
+                <p class="card-subtitle text-body-secondary mb-3">Carregue, salve ou exporte os dados do modelo.</p>
+                <div class="btn-toolbar">
+                    <div class="btn-group me-2 mb-2" role="group">
+                        <button class="btn btn-primary" onclick="window.pywebview.api.open_excel_dialog()"><i class="bi bi-folder2-open me-2"></i>Carregar Excel</button>
+                        <button class="btn btn-secondary" onclick="window.pywebview.api.load_data()"><i class="bi bi-file-bar-graph me-2"></i>Usar Exemplo</button>
+                    </div>
+                     <div class="btn-group mb-2" role="group">
+                        <button class="btn btn-outline-secondary" onclick="exportToExcel()"><i class="bi bi-file-earmark-excel me-2"></i>Exportar Dados</button>
+                        <button class="btn btn-outline-secondary" onclick="window.pywebview.api.download_excel_template_dialog()"><i class="bi bi-cloud-download me-2"></i>Baixar Modelo</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+             <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Matrizes de Dados</h5>
+                <div>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="addZone()">+ Adicionar Zona</button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="removeZone()">- Remover Zona</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <h6>Origens e Destinos</h6>
+                        <table class="table table-sm editable-table" id="od-table"></table>
+                    </div>
+                    <div class="col-lg-8">
+                        <ul class="nav nav-tabs" id="cost-matrix-tabs" role="tablist"></ul>
+                        <div class="tab-content" id="cost-matrix-tabs-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="analise-pane" class="content-pane">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">Resultados da Análise de Cenários</h2>
+            <button class="btn btn-danger" id="export-button" onclick="exportResultsToPdf()" disabled>
+                <i class="bi bi-file-earmark-pdf me-2"></i>Exportar Relatório para PDF
+            </button>
+        </div>
+        <div class="card mb-4">
+             <div class="card-header"><h5 class="mb-0">Comparativo de Cenários</h5></div>
+            <div class="card-body">
+                <div id="summary-table-container" class="table-responsive"></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h5 class="mb-0">Análise Detalhada por Cenário</h5></div>
+            <div class="card-body">
+                <div id="scenario-nav-buttons" class="nav nav-pills mb-3"></div>
+                <div class="row mt-4 align-items-center">
+                    <div class="col-lg-8" id="results-heatmap-wrapper"></div>
+                    <div class="col-lg-4" id="metrics-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="interactive-pane" class="content-pane">
+        <h2 class="mb-4">Cenário Interativo</h2>
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0">Simulação de Parâmetros</h5></div>
+             <div class="card-body">
+                 <div class="row">
+                    <div class="col-md-4">
+                        <h6>Parâmetros de Sensibilidade</h6>
+                        <hr/>
+                        <label for="alpha-slider" class="form-label">α (Alfa - Tempo): <span id="alpha-value">1.0</span></label>
+                        <input type="range" class="form-range" min="0" max="5" step="0.1" value="1.0" id="alpha-slider">
+                        <label for="beta-slider" class="form-label">β (Beta - Distância): <span id="beta-value">1.0</span></label>
+                        <input type="range" class="form-range" min="0" max="5" step="0.1" value="1.0" id="beta-slider">
+                        <label for="gamma-slider" class="form-label">γ (Gama - Preço): <span id="gamma-value">1.0</span></label>
+                        <input type="range" class="form-range" min="0" max="5" step="0.1" value="1.0" id="gamma-slider">
+                        <hr/>
+                        <div id="interactive-metrics"></div>
+                    </div>
+                    <div class="col-md-8">
+                        <div id="interactive-heatmap">
+                             <p class="text-center text-muted mt-5">Ajuste os parâmetros para visualizar o resultado.</p>
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </div>
+        <div id="sensitivity-chart-container" class="card"></div>
+    </div>
+
+    <div id="dashboard-pane" class="content-pane">
+         <h2 class="mb-4">Dashboard de Análise</h2>
+         <div id="dashboard-content" class="text-center text-muted pt-5">
+             <p>Execute uma análise para visualizar as métricas aqui.</p>
+         </div>
+
+         <div id="dashboard-charts" class="mt-5">
+            <div class="row g-4">
+                <div class="col-12">
+                    <div id="cost-comparison-chart-container" class="card"></div>
+                </div>
+                 <div class="col-12">
+                    <div id="generation-attraction-chart-container" class="card"></div>
+                </div>
+                <div class="col-12">
+                    <div id="trip-distribution-histograms-container" class="card"></div>
+                </div>
+            </div>
+         </div>
+    </div>
+
+    <div id="analysis-tools-pane" class="content-pane">
+        <h2 class="mb-4">Ferramentas de Análise</h2>
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0"><i class="bi bi-compass me-2"></i>Índice de Acessibilidade</h5></div>
+            <div class="card-body">
+                <p class="card-subtitle text-body-secondary mb-3">Calcula o índice de acessibilidade para cada zona com base nos dados de entrada e nos parâmetros (α, β, γ) definidos na aba "Cenário Interativo".</p>
+                <button class="btn btn-primary" onclick="runAccessibilityAnalysis()">
+                    <i class="bi bi-calculator-fill me-2"></i>Calcular Acessibilidade
+                </button>
+                 <div id="accessibility-results-container" class="mt-4"></div>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-header"><h5 class="mb-0"><i class="bi bi-arrows-fullscreen me-2"></i>Análise de Viagens Intrazonais</h5></div>
+            <div class="card-body">
+                <p class="card-subtitle text-body-secondary mb-3">Analisa a proporção de viagens que ocorrem dentro da mesma zona em relação às que ocorrem entre zonas diferentes para um cenário específico.</p>
+                <div class="input-group">
+                    <select class="form-select" id="intrazonal-scenario-select"></select>
+                    <button class="btn btn-primary" onclick="runIntrazonalAnalysis()"><i class="bi bi-pie-chart-fill me-2"></i>Analisar</button>
+                </div>
+                <div id="intrazonal-results-container" class="mt-4"></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h5 class="mb-0"><i class="bi bi-subtract me-2"></i>Matriz de Diferença entre Cenários</h5></div>
+            <div class="card-body">
+                <p class="card-subtitle text-body-secondary mb-3">Compare dois cenários e visualize um mapa de calor com a diferença (absoluta ou percentual) no número de viagens entre eles.</p>
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-4"><select class="form-select" id="diff-scenario-a-select" aria-label="Cenário A"></select></div>
+                    <div class="col-md-4"><select class="form-select" id="diff-scenario-b-select" aria-label="Cenário B"></select></div>
+                    <div class="col-md-4">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="diff-type" id="diff-abs" value="absolute" checked>
+                            <label class="form-check-label" for="diff-abs">Absoluta</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="diff-type" id="diff-perc" value="percentage">
+                            <label class="form-check-label" for="diff-perc">Percentual (%)</label>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary mt-3 w-100" onclick="runScenarioDifferenceAnalysis()"><i class="bi bi-grid-3x3-gap-fill me-2"></i>Gerar Matriz de Diferença</button>
+                <div id="difference-heatmap-container" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-pane" class="content-pane">
+        <h2 class="mb-4">Configurações</h2>
+        <div class="card">
+            <div class="card-header"><h5 class="mb-0"><i class="bi bi-sliders2 me-2"></i>Parâmetros do Algoritmo</h5></div>
+            <div class="card-body">
+                <p class="card-subtitle text-body-secondary mb-3">
+                    Ajuste os parâmetros de execução do Modelo Gravitacional. Estes valores são lidos sempre que
+                    você executa uma nova análise ou um cenário interativo.
+                </p>
+                <div class="mb-3">
+                    <label for="max-iter-input" class="form-label">Número Máximo de Iterações</label>
+                    <input type="number" class="form-control" id="max-iter-input" value="200">
+                    <div class="form-text">Define o limite de iterações para o algoritmo de Furness convergir.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="tolerance-input" class="form-label">Tolerância de Convergência</label>
+                    <input type="number" class="form-control" id="tolerance-input" step="0.0001" value="0.0005">
+                     <div class="form-text">Define o critério de parada baseado no erro relativo máximo entre as iterações.</div>
+                </div>
+                <div class="p-3 border rounded mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="intrazonal-switch" checked>
+                        <label class="form-check-label" for="intrazonal-switch">Permitir Viagens Intrazonais (Diagonal da Matriz)</label>
+                    </div>
+                    <div class="form-text ps-1">Se desativado, o modelo atribui uma impedância infinita às viagens que começam e terminam na mesma zona.</div>
+                </div>
+                <div class="mb-3 p-3 border rounded">
+                    <label class="form-label">Função de Impedância</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="impedanceFunction" id="func-potencia" value="potencia" checked>
+                        <label class="form-check-label" for="func-potencia">
+                            Potência: <code>1 / (t<sup>α</sup> * d<sup>β</sup> * p<sup>γ</sup>)</code>
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="impedanceFunction" id="func-exponencial" value="exponencial">
+                        <label class="form-check-label" for="func-exponencial">
+                            Exponencial: <code>1 / e<sup>(α*t + β*d + γ*p)</sup></code>
+                        </label>
+                    </div>
+                    <div class="form-text">Define a fórmula matemática para calcular a resistência entre as zonas. α, β e γ são os pesos definidos nos cenários.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="about-pane" class="content-pane">
+        <div class="card">
+            <div class="card-header"><h2 class="mb-0">Sobre o Projeto</h2></div>
+            <div class="card-body p-4">
+                <p class="lead">Esta aplicação implementa o Modelo Gravitacional de Alocação de Viagens, utilizando o método de Fator Duplo (Doubly Constrained).</p>
+                <hr class="my-4">
+                <h5>Metodologia</h5>
+                <p>O modelo estima uma matriz Origem-Destino (OD) com base na atratividade entre zonas, que é proporcional à sua capacidade de geração e atração, e inversamente proporcional a uma função de impedância (custos de tempo, distância e preço).</p>
+                <h5>Autores</h5><p>Danilo Ferreira e Samuel Sousa</p>
+                <h5>Disciplina</h5><p>Análise e Planejamento de Sistema de Transportes</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="assets/bootstrap.bundle.min.js"></script>
+<script src="js/script.js"></script>
+
+</body>
+</html>

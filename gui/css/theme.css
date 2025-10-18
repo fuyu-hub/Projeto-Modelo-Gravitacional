@@ -1,0 +1,45 @@
+/* gui/css/theme.css */
+
+/* --- Light Theme Variables --- */
+:root {
+    --bg-color: #f8f9fa;
+    --text-color: #212529;
+    --border-color: #dee2e6;
+    --sidebar-bg: rgba(255, 255, 255, 0.7);
+    --card-bg: #ffffff;
+    --primary-action-color: #0d6efd;
+    --secondary-action-color: #6c757d;
+    --text-muted-custom: #6c757d;
+    --invalid-color: #dc3545;
+    --table-header-bg: #f8f9fa;
+    --input-hover-bg: #e9ecef;
+    --input-focus-bg: #dee2e6;
+    --bs-body-bg: var(--bg-color);
+    --bs-body-color: var(--text-color);
+    --bs-border-color-translucent: rgba(0, 0, 0, 0.1);
+    --bs-secondary-bg-subtle: #e2e3e5;
+    --bs-secondary-text-emphasis: #41464b;
+    /* NOVAS VARIÁVEIS */
+    --diff-legend-gradient: linear-gradient(to right, hsl(240, 85%, 55%), hsl(220, 10%, 95%), hsl(0, 85%, 55%));
+}
+
+/* --- Dark Theme Variables --- */
+html[data-bs-theme='dark'] {
+    --bg-color: #1a1d21;
+    --text-color: #e9ecef;
+    --border-color: rgba(255, 255, 255, 0.15);
+    --sidebar-bg: rgba(33, 37, 41, 0.75);
+    --card-bg: #2b3035;
+    --primary-action-color: #0d6efd;
+    --secondary-action-color: #5c636a;
+    --text-muted-custom: #adb5bd;
+    --invalid-color: #dc3545;
+    --table-header-bg: #343a40;
+    --input-hover-bg: rgba(255, 255, 255, 0.05);
+    --input-focus-bg: rgba(255, 255, 255, 0.1);
+    --bs-secondary-bg-subtle: #343a40;
+    --bs-secondary-text-emphasis: #dee2e6;
+    /* NOVAS VARIÁVEIS */
+    --diff-legend-gradient: linear-gradient(to right, hsl(240, 85%, 55%), hsl(220, 10%, 25%), hsl(0, 85%, 55%));
+}
+}

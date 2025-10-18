@@ -1,0 +1,9 @@
+numpy
+pandas
+matplotlib
+seaborn
+openpyxl
+reportlab
+pywebview
+pytest
+PyInstaller

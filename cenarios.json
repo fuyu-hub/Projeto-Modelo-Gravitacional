@@ -1,0 +1,8 @@
+[
+    {"alpha": 0.0, "beta": 0.0, "gamma": 0.0, "nome": "Caso 1 (Base)"},
+    {"alpha": 1.0, "beta": 1.0, "gamma": 1.0, "nome": "Caso 2 (Mesmo peso)"},
+    {"alpha": 2.0, "beta": 0.0, "gamma": 0.0, "nome": "Caso 3 (Foco em Tempo)"},
+    {"alpha": 0.0, "beta": 2.0, "gamma": 0.0, "nome": "Caso 4 (Foco em Distância)"},
+    {"alpha": 0.0, "beta": 0.0, "gamma": 2.0, "nome": "Caso 5 (Foco em Preço)"},
+    {"alpha": 2.0, "beta": 2.0, "gamma": 2.0, "nome": "Caso 6 (Sensibilidade Alta)"}
+]
