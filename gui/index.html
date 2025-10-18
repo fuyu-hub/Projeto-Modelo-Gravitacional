@@ -95,11 +95,12 @@
                 <div class="row">
                     <div class="col-lg-4">
                         <h6>Origens e Destinos</h6>
-                        <table class="table table-sm editable-table" id="od-table"></table>
-                    </div>
+                        <div class="table-responsive"> <table class="table table-sm editable-table" id="od-table"></table>
+                        </div> </div>
                     <div class="col-lg-8">
                         <ul class="nav nav-tabs" id="cost-matrix-tabs" role="tablist"></ul>
-                        <div class="tab-content" id="cost-matrix-tabs-content"></div>
+                        <div class="tab-content" id="cost-matrix-tabs-content">
+                            </div>
                     </div>
                 </div>
             </div>
@@ -124,8 +125,10 @@
             <div class="card-body">
                 <div id="scenario-nav-buttons" class="nav nav-pills mb-3"></div>
                 <div class="row mt-4 align-items-center">
-                    <div class="col-lg-8" id="results-heatmap-wrapper"></div>
-                    <div class="col-lg-4" id="metrics-container"></div>
+                    <div class="col-lg-8" id="results-heatmap-wrapper">
+                        </div>
+                    <div class="col-lg-4" id="metrics-container">
+                        </div>
                 </div>
             </div>
         </div>
@@ -157,7 +160,8 @@
                 </div>
              </div>
         </div>
-        <div id="sensitivity-chart-container" class="card"></div>
+        <div id="sensitivity-chart-container" class="card">
+            </div>
     </div>
 
     <div id="dashboard-pane" class="content-pane">
@@ -190,7 +194,7 @@
                 <button class="btn btn-primary" onclick="runAccessibilityAnalysis()">
                     <i class="bi bi-calculator-fill me-2"></i>Calcular Acessibilidade
                 </button>
-                 <div id="accessibility-results-container" class="mt-4"></div>
+                 <div id="accessibility-results-container" class="mt-4 table-responsive"> </div>
             </div>
         </div>
         <div class="card mb-4">
@@ -201,7 +205,8 @@
                     <select class="form-select" id="intrazonal-scenario-select"></select>
                     <button class="btn btn-primary" onclick="runIntrazonalAnalysis()"><i class="bi bi-pie-chart-fill me-2"></i>Analisar</button>
                 </div>
-                <div id="intrazonal-results-container" class="mt-4"></div>
+                <div id="intrazonal-results-container" class="mt-4">
+                    </div>
             </div>
         </div>
         <div class="card">
@@ -223,7 +228,7 @@
                     </div>
                 </div>
                 <button class="btn btn-primary mt-3 w-100" onclick="runScenarioDifferenceAnalysis()"><i class="bi bi-grid-3x3-gap-fill me-2"></i>Gerar Matriz de Diferença</button>
-                <div id="difference-heatmap-container" class="mt-4"></div>
+                <div id="difference-heatmap-container" class="mt-4 table-responsive"> </div>
             </div>
         </div>
     </div>
