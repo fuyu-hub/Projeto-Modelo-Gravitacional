@@ -39,7 +39,7 @@ class Visualization:
             'shrink': 0.9 # Ajusta o tamanho da barra para melhor ajuste
         }
 
-        sns.heatmap(matriz, annot=True, fmt='.1f', cmap=self.CMAP_SEQUENCIAL,
+        sns.heatmap(matriz, annot=True, fmt='.0f', cmap=self.CMAP_SEQUENCIAL,
                     xticklabels=zonas, yticklabels=zonas, linewidths=.5, ax=ax,
                     cbar_kws=cbar_kws, annot_kws={"size": 9})
 
@@ -55,7 +55,7 @@ class Visualization:
     def gerar_heatmap_impedancia(self, matriz: np.ndarray, zonas: List[str], titulo: str) -> str:
         """Gera um heatmap pequeno para as matrizes de impedância."""
         fig, ax = plt.subplots(figsize=(2.8, 2.3))
-        sns.heatmap(matriz, annot=True, fmt='.1f', cmap=self.CMAP_SEQUENCIAL + '_r',
+        sns.heatmap(matriz, annot=True, fmt='.0f', cmap=self.CMAP_SEQUENCIAL + '_r',
                     xticklabels=zonas, yticklabels=zonas, linewidths=.5, ax=ax,
                     cbar=False, annot_kws={"size": 8})
         ax.set_title(titulo, fontsize=10)
@@ -85,7 +85,7 @@ class Visualization:
     def gerar_mini_heatmap_base(self, matriz: np.ndarray, zonas: List[str], titulo: str) -> str:
         """Gera um heatmap de tamanho médio para a página de resumo."""
         fig, ax = plt.subplots(figsize=(5, 4))
-        sns.heatmap(matriz, annot=True, fmt='.1f', cmap=self.CMAP_SEQUENCIAL,
+        sns.heatmap(matriz, annot=True, fmt='.0f', cmap=self.CMAP_SEQUENCIAL,
                     xticklabels=zonas, yticklabels=zonas, linewidths=.5, ax=ax,
                     cbar_kws={'label': 'Nº de Viagens'}, annot_kws={"size": 11})
         ax.set_title(titulo, fontsize=12)

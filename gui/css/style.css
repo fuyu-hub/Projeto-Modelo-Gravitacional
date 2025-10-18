@@ -131,7 +131,7 @@ html[data-bs-theme='light'] #heatmap-tooltip { background: rgba(255, 255, 255, 0
 .heatmap-legend {
     width: 100%;
     height: 10px;
-    background: linear-gradient(to right, hsl(120, 85%, 50%), hsl(60, 85%, 60%), hsl(0, 85%, 50%));
+    background: linear-gradient(to right, #440154, #3b528b, #21908d, #5dc863, #fde725);
     border-radius: 5px;
 }
 

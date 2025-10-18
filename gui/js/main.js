@@ -290,8 +290,6 @@ function displayResults(results) {
     scenarioButtonsContainer.innerHTML = results.detailed_scenarios.map((scenario, index) => `<button class="nav-link ${index === 0 ? 'active' : ''}" onclick="displayScenario(${index})">${scenario.Cenário}</button>`).join('');
 
     displayScenario(0);
-    buildDashboard(results);
-    populateToolSelectors();
 
     document.getElementById('export-button').disabled = false;
     toggleSpinner(false);
@@ -327,207 +325,7 @@ function buildSummaryTable(data) {
     container.appendChild(table);
 }
 
-function buildDashboard(results) {
-    const container = document.getElementById('dashboard-content');
-    const baseScenario = results.detailed_scenarios[0];
-    const totalTrips = baseScenario.matriz_viagens.flat().reduce((a, b) => a + b, 0);
 
-    const tempoTotal = baseScenario.metrics.custo_tempo;
-    const distanciaTotal = baseScenario.metrics.custo_distancia;
-
-    const tempoMedio = totalTrips > 0 ? (tempoTotal / totalTrips) : 0;
-    const distanciaMedia = totalTrips > 0 ? (distanciaTotal / totalTrips) : 0;
-
-    container.innerHTML = `
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card text-center h-100">
-                    <div class="card-body">
-                        <h6 class="card-subtitle text-body-secondary">Total de Viagens (Base)</h6>
-                        <p class="display-4 fw-bold mb-0">${Math.round(totalTrips)}</p>
-                    </div>
-                </div>
-            </div>
-             <div class="col-md-4">
-                <div class="card text-center h-100">
-                    <div class="card-body">
-                        <h6 class="card-subtitle text-body-secondary">Tempo Médio de Viagem</h6>
-                        <p class="display-4 fw-bold mb-0">${tempoMedio.toFixed(2)} <span class="fs-4 text-muted">h</span></p>
-                    </div>
-                </div>
-            </div>
-             <div class="col-md-4">
-                <div class="card text-center h-100">
-                    <div class="card-body">
-                        <h6 class="card-subtitle text-body-secondary">Distância Média de Viagem</h6>
-                        <p class="display-4 fw-bold mb-0">${distanciaMedia.toFixed(2)} <span class="fs-4 text-muted">km</span></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    buildCostComparisonChart(results.detailed_scenarios, results.resistance_names);
-    buildGenerationAttractionChart(results.dados_base, baseScenario, results.zonas);
-    buildTripDistributionHistograms(baseScenario, results.dados_base, results.resistance_names);
-}
-
-function buildCostComparisonChart(scenarios, resistanceNames) {
-    const container = document.getElementById('cost-comparison-chart-container');
-    const costs = {
-        tempo: { label: resistanceNames.tempo, values: [] },
-        distancia: { label: resistanceNames.distancia, values: [] },
-        preco: { label: resistanceNames.preco, values: [] },
-    };
-    const scenarioNames = scenarios.map(s => s.Cenário);
-
-    scenarios.forEach(s => {
-        costs.tempo.values.push(s.metrics.custo_tempo);
-        costs.distancia.values.push(s.metrics.custo_distancia);
-        costs.preco.values.push(s.metrics.custo_preco);
-    });
-
-    const maxValues = {
-        tempo: Math.max(...costs.tempo.values),
-        distancia: Math.max(...costs.distancia.values),
-        preco: Math.max(...costs.preco.values),
-    };
-
-    let chartHtml = `
-        <div class="card-header"><h5 class="mb-0">Comparativo de Custos Totais por Cenário</h5></div>
-        <div class="card-body">
-            <div class="row g-4">`;
-
-    Object.keys(costs).forEach(key => {
-        chartHtml += `
-            <div class="col-md-4">
-                <h6>${costs[key].label}</h6>
-                <div class="chart-container">
-        `;
-        costs[key].values.forEach((value, index) => {
-            const percentage = maxValues[key] > 0 ? (value / maxValues[key]) * 100 : 0;
-            chartHtml += `
-                <div class="bar-wrapper">
-                    <div class="bar-label">${scenarioNames[index]}</div>
-                    <div class="bar" style="width: ${percentage}%;" title="${value.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}"></div>
-                    <div class="bar-value">${value.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</div>
-                </div>
-            `;
-        });
-        chartHtml += `</div></div>`;
-    });
-
-    chartHtml += `</div></div>`;
-    container.innerHTML = chartHtml;
-}
-
-function buildGenerationAttractionChart(dadosBase, baseScenario, zonas) {
-    const container = document.getElementById('generation-attraction-chart-container');
-    const calculatedO = Array(zonas.length).fill(0);
-    const calculatedD = Array(zonas.length).fill(0);
-
-    baseScenario.matriz_viagens.forEach((row, i) => {
-        row.forEach((val, j) => {
-            calculatedO[i] += val;
-            calculatedD[j] += val;
-        });
-    });
-
-    let tableHtml = `
-        <div class="card-header"><h5 class="mb-0">Geração e Atração por Zona (Cenário Base)</h5></div>
-        <div class="card-body table-responsive">
-            <table class="table table-sm">
-                <thead>
-                    <tr>
-                        <th>Zona</th>
-                        <th>Geração Original (O)</th>
-                        <th>Geração Calculada (ΣTij)</th>
-                        <th>Atração Original (D)</th>
-                        <th>Atração Calculada (ΣTij)</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
-
-    zonas.forEach((zona, i) => {
-        tableHtml += `
-            <tr>
-                <td>${zona}</td>
-                <td>${dadosBase.o[i].toFixed(0)}</td>
-                <td>${calculatedO[i].toFixed(0)}</td>
-                <td>${dadosBase.d[i].toFixed(0)}</td>
-                <td>${calculatedD[i].toFixed(0)}</td>
-            </tr>
-        `;
-    });
-
-    tableHtml += `</tbody></table></div>`;
-    container.innerHTML = tableHtml;
-}
-
-
-function buildTripDistributionHistograms(baseScenario, dadosBase, resistanceNames) {
-    const container = document.getElementById('trip-distribution-histograms-container');
-    const trips = [];
-    baseScenario.matriz_viagens.forEach((row, i) => {
-        row.forEach((numTrips, j) => {
-            if (numTrips > 0) {
-                trips.push({
-                    count: numTrips,
-                    tempo: dadosBase.tempo[i][j],
-                    distancia: dadosBase.distancia[i][j],
-                    preco: dadosBase.preco[i][j],
-                });
-            }
-        });
-    });
-
-    const createHistogram = (data, title, unit) => {
-        const values = data.flatMap(d => Array(Math.round(d.count)).fill(d.value));
-        if (values.length === 0) return `<p>Sem dados para ${title}.</p>`;
-
-        const maxVal = Math.max(...values);
-        const binCount = 5;
-        const binSize = maxVal / binCount;
-        const bins = Array(binCount).fill(0);
-
-        values.forEach(val => {
-            const binIndex = Math.min(Math.floor(val / binSize), binCount - 1);
-            bins[binIndex]++;
-        });
-
-        const maxBinValue = Math.max(...bins);
-        let histogramHtml = `<h6>${title}</h6><div class="histogram">`;
-        bins.forEach((count, i) => {
-            const percentage = maxBinValue > 0 ? (count / maxBinValue) * 100 : 0;
-            const rangeStart = (i * binSize).toFixed(1);
-            const rangeEnd = ((i + 1) * binSize).toFixed(1);
-            histogramHtml += `
-                <div class="hist-bar-wrapper">
-                    <div class="hist-bar" style="height: ${percentage}%;" title="${count} viagens"></div>
-                    <div class="hist-label">${rangeStart}-${rangeEnd} ${unit}</div>
-                </div>
-            `;
-        });
-        histogramHtml += `</div>`;
-        return histogramHtml;
-    };
-
-    const tempoData = trips.map(t => ({ value: t.tempo, count: t.count }));
-    const distanciaData = trips.map(t => ({ value: t.distancia, count: t.count }));
-    const precoData = trips.map(t => ({ value: t.preco, count: t.count }));
-
-    container.innerHTML = `
-        <div class="card-header"><h5 class="mb-0">Distribuição de Viagens por Custo (Cenário Base)</h5></div>
-        <div class="card-body">
-            <div class="row text-center">
-                <div class="col-md-4">${createHistogram(tempoData, resistanceNames.tempo, 'h')}</div>
-                <div class="col-md-4">${createHistogram(distanciaData, resistanceNames.distancia, 'km')}</div>
-                <div class="col-md-4">${createHistogram(precoData, resistanceNames.preco, 'R$')}</div>
-            </div>
-        </div>
-    `;
-}
 
 function displayScenario(index) {
     document.querySelectorAll('#scenario-nav-buttons .nav-link').forEach((btn, i) => btn.classList.toggle('active', i === index));
@@ -605,47 +403,92 @@ function generateHtmlHeatmap(containerId, scenarioData, baseData) {
     addTooltipEvents(containerId, scenarioData, baseData);
 }
 
+// --- INÍCIO DO TRECHO PARA SUBSTITUIR ---
+
+function getViridisColor(t) {
+    // Pontos aproximados do colormap Viridis (t=0 a t=1) -> [r, g, b]
+    const colors = [
+        [68, 1, 84],    // 0.0 Púrpura escuro
+        [59, 82, 139],  // 0.25 Azul
+        [33, 145, 140], // 0.5 Verde-azulado
+        [94, 200, 99],  // 0.75 Verde
+        [253, 231, 37]  // 1.0 Amarelo
+    ];
+
+    // Garante que t esteja no intervalo [0, 1]
+    t = Math.max(0, Math.min(1, t));
+
+    // Encontra os dois pontos de cor entre os quais t se encontra
+    const i = Math.floor(t * (colors.length - 1));
+    const localT = (t * (colors.length - 1)) - i;
+
+    // Trata os casos extremos
+    if (i >= colors.length - 1) return colors[colors.length - 1];
+
+    const c1 = colors[i];
+    const c2 = colors[i + 1];
+
+    // Interpola linearmente entre as cores c1 e c2
+    const r = Math.round(c1[0] + (c2[0] - c1[0]) * localT);
+    const g = Math.round(c1[1] + (c2[1] - c1[1]) * localT);
+    const b = Math.round(c1[2] + (c2[2] - c1[2]) * localT);
+
+    return [r, g, b];
+}
+
+function getTextColorForBackground(rgb) {
+    // Verificação simples de brilho para cor do texto (claro ou escuro)
+    // Fórmula de luminosidade percebida
+    const brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
+    // Retorna a variável CSS correspondente para texto escuro ou claro
+    return brightness > 128 ? 'var(--bs-dark)' : 'var(--bs-light)';
+}
+
 function getThemedColorForValue(value, min, max, diverging = false) {
     const theme = document.documentElement.getAttribute('data-bs-theme');
     const neutralBg = theme === 'dark' ? 'hsl(220, 10%, 25%)' : 'hsl(220, 10%, 95%)';
     const neutralText = theme === 'dark' ? 'var(--bs-gray-400)' : 'var(--bs-gray-700)';
-    const darkText = 'var(--bs-dark)';
-    const lightText = 'var(--bs-light)';
 
-    if (!diverging) {
-        if (value <= 0 || max <= min) return { background: neutralBg, color: neutralText };
+    if (diverging) {
+         const darkText = 'var(--bs-dark)';
+         const lightText = 'var(--bs-light)';
+         const absMax = Math.max(Math.abs(min), Math.abs(max));
+         // Retorna cor neutra se o valor máximo absoluto for zero ou se o valor não for finito
+         if (absMax === 0 || !isFinite(value)) return { background: neutralBg, color: neutralText };
 
-        const t = (value - min) / (max - min);
+         const t = value / absMax; // t varia de -1 a 1
+         const neutralLightness = theme === 'dark' ? 20 : 100; // Ajuste a claridade neutra para temas escuro/claro
+         let h, s, l;
 
-        const h = (1 - t) * 120; // 120 (Green) -> 0 (Red)
-        const s = 85;
-        const l = 60 - 25 * Math.abs(t - 0.5) * 2; // 50 at Green/Red, 60 at Yellow
+         // Define a cor baseada no valor ser negativo (azul) ou positivo (vermelho)
+         if (t < 0) { // Faixa Azul
+             h = 240; s = 85;
+             l = neutralLightness + (t * (neutralLightness - 55)); // Interpola a claridade
+         } else { // Faixa Vermelha
+             h = 0; s = 85;
+             l = neutralLightness - (t * (neutralLightness - 55)); // Interpola a claridade
+         }
+         // Garante que a claridade esteja no intervalo [0, 100]
+         l = Math.max(0, Math.min(100, l));
 
-        const textColor = l > 55 ? darkText : lightText;
+         // Determina a cor do texto com base na claridade do fundo
+         const textColor = l > 65 ? darkText : lightText; // Ajuste o limiar se necessário
+         return { background: `hsl(${h}, ${s}%, ${l}%)`, color: textColor };
+    }
+    // --- NOVA lógica Viridis para heatmap padrão ---
+    else {
+        // Retorna cor neutra para valores inválidos, zero, ou se min >= max
+        if (value <= 0 || max <= min || !isFinite(value)) return { background: neutralBg, color: neutralText };
 
-        return { background: `hsl(${h}, ${s}%, ${l}%)`, color: textColor };
-    } else {
-        const absMax = Math.max(Math.abs(min), Math.abs(max));
-        if (absMax === 0) return { background: neutralBg, color: neutralText };
+        const t = (value - min) / (max - min); // Normaliza o valor para o intervalo 0-1
+        const rgb = getViridisColor(t); // Obtém a cor Viridis correspondente
+        const bgColor = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`; // Formata como string RGB
+        const textColor = getTextColorForBackground(rgb); // Determina a cor do texto
 
-        const t = value / absMax; // t from -1 to 1
-
-        const neutralLightness = theme === 'dark' ? 20 : 100;
-
-        let h, s, l;
-
-        if (t < 0) { // Blue range
-            h = 240; s = 85;
-            l = neutralLightness - (t * (neutralLightness - 55));
-        } else { // Red range
-            h = 0; s = 85;
-            l = neutralLightness - (t * (neutralLightness - 55));
-        }
-
-        const textColor = l > 65 ? darkText : lightText;
-        return { background: `hsl(${h}, ${s}%, ${l}%)`, color: textColor };
+        return { background: bgColor, color: textColor };
     }
 }
+
 
 
 function addTooltipEvents(containerId, scenarioData, baseData) {
@@ -709,135 +552,7 @@ function exportToExcel() {
     }
 }
 
-// --- NOVAS FUNÇÕES DAS FERRAMENTAS ---
 
-function populateToolSelectors() {
-    const scenarios = AppState.results.detailed_scenarios;
-    if (!scenarios) return;
-
-    const options = scenarios.map((s, i) => `<option value="${i}">${s.Cenário}</option>`).join('');
-
-    document.getElementById('intrazonal-scenario-select').innerHTML = options;
-    document.getElementById('diff-scenario-a-select').innerHTML = options;
-    document.getElementById('diff-scenario-b-select').innerHTML = options;
-
-    if (scenarios.length > 1) {
-        document.getElementById('diff-scenario-b-select').selectedIndex = 1;
-    }
-}
-
-
-function runIntrazonalAnalysis() {
-    const scenarioIndex = document.getElementById('intrazonal-scenario-select').value;
-    const scenario = AppState.results.detailed_scenarios[scenarioIndex];
-    if (!scenario) return;
-
-    let intraZonalTrips = 0;
-    let totalTrips = 0;
-
-    scenario.matriz_viagens.forEach((row, i) => {
-        row.forEach((value, j) => {
-            totalTrips += value;
-            if (i === j) {
-                intraZonalTrips += value;
-            }
-        });
-    });
-
-    const interZonalTrips = totalTrips - intraZonalTrips;
-    const intraPercent = totalTrips > 0 ? (intraZonalTrips / totalTrips) * 100 : 0;
-    const interPercent = totalTrips > 0 ? (interZonalTrips / totalTrips) * 100 : 0;
-
-    const container = document.getElementById('intrazonal-results-container');
-    container.innerHTML = `
-        <div class="row mt-3 text-center">
-            <div class="col-6">
-                <div class="card bg-secondary-subtle">
-                    <div class="card-body">
-                        <h6 class="card-subtitle text-body-secondary">Viagens Intrazonais</h6>
-                        <p class="display-6 fw-bold mb-0">${Math.round(intraZonalTrips)}</p>
-                        <p class="mb-0">(${intraPercent.toFixed(2)}%)</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6">
-                <div class="card">
-                     <div class="card-body">
-                        <h6 class="card-subtitle text-body-secondary">Viagens Interzonais</h6>
-                        <p class="display-6 fw-bold mb-0">${Math.round(interZonalTrips)}</p>
-                         <p class="mb-0">(${interPercent.toFixed(2)}%)</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function runScenarioDifferenceAnalysis() {
-    const indexA = document.getElementById('diff-scenario-a-select').value;
-    const indexB = document.getElementById('diff-scenario-b-select').value;
-    const type = document.querySelector('input[name="diff-type"]:checked').value;
-
-    if (indexA === indexB) {
-        showNotification("Por favor, selecione dois cenários diferentes para comparar.", "bi-exclamation-triangle-fill text-warning");
-        return;
-    }
-
-    const scenarioA = AppState.results.detailed_scenarios[indexA];
-    const scenarioB = AppState.results.detailed_scenarios[indexB];
-
-    const diffMatrix = scenarioA.matriz_viagens.map((row, i) =>
-        row.map((val, j) => {
-            const valA = val;
-            const valB = scenarioB.matriz_viagens[i][j];
-            if (type === 'absolute') {
-                return valA - valB;
-            } else { // percentage
-                return valB === 0 ? (valA > 0 ? 100 : 0) : ((valA - valB) / valB) * 100;
-            }
-        })
-    );
-
-    generateDifferenceHeatmap(diffMatrix, type);
-}
-
-function generateDifferenceHeatmap(matrix, type) {
-    const container = document.getElementById('difference-heatmap-container');
-    const baseData = AppState.results;
-
-    const flatMatrix = matrix.flat().filter(isFinite);
-    const minVal = Math.min(...flatMatrix);
-    const maxVal = Math.max(...flatMatrix);
-
-    let tableHtml = `<h6 class="text-center mt-3">Diferença ${type === 'absolute' ? 'Absoluta' : 'Percentual'}</h6>`;
-    tableHtml += '<table class="heatmap-table"><thead><tr><th>O↓|D→</th>';
-    baseData.zonas.forEach(zona => tableHtml += `<th>${zona}</th>`);
-    tableHtml += '</tr></thead><tbody>';
-
-    matrix.forEach((row, i) => {
-        tableHtml += `<tr><th>${baseData.zonas[i]}</th>`;
-        row.forEach((value, j) => {
-            const { background, color } = getThemedColorForValue(value, minVal, maxVal, true);
-            const displayValue = isFinite(value) ? (type === 'absolute' ? Math.round(value) : `${value.toFixed(1)}%`) : 'N/A';
-            tableHtml += `<td style="background-color: ${background}; color: ${color};" title="${isFinite(value) ? value.toFixed(2) : 'N/A'}">${displayValue}</td>`;
-        });
-        tableHtml += '</tr>';
-    });
-    tableHtml += '</tbody></table>';
-
-    const legendHtml = `
-        <div class="mt-3">
-            <div class="heatmap-legend-diff"></div>
-            <div class="d-flex justify-content-between small text-muted mt-1">
-                <span>${minVal.toFixed(1)}</span>
-                <span>Diferença</span>
-                <span>+${maxVal.toFixed(1)}</span>
-            </div>
-        </div>
-    `;
-
-    container.innerHTML = tableHtml + legendHtml;
-}
 
 
 function updateSensitivityChart(params, costs) {
@@ -896,62 +611,4 @@ function updateSensitivityChart(params, costs) {
         </div>
     `;
     container.innerHTML = chartHtml;
-}
-
-function runAccessibilityAnalysis() {
-    const payload = gatherDataFromTables();
-    if (!payload) return;
-
-    showNotification("Calculando Acessibilidade...", "bi-hourglass-split");
-
-    payload.params = {
-        alpha: parseFloat(document.getElementById('alpha-slider').value),
-        beta: parseFloat(document.getElementById('beta-slider').value),
-        gamma: parseFloat(document.getElementById('gamma-slider').value),
-    };
-
-    window.pywebview.api.run_accessibility_analysis(payload);
-}
-
-function displayAccessibilityResults(results) {
-    const container = document.getElementById('accessibility-results-container');
-    if (!results || results.length === 0) {
-        container.innerHTML = '<div class="alert alert-warning">Não foi possível calcular a acessibilidade.</div>';
-        return;
-    }
-
-    let tableHtml = `
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Zona</th>
-                    <th>Índice de Acessibilidade (Normalizado)</th>
-                    <th>Pontuação Bruta</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-
-    results.forEach(item => {
-        tableHtml += `
-            <tr>
-                <td>${item.zona}</td>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <div class="progress" style="height: 20px; flex-grow: 1; margin-right: 10px;" role="progressbar" aria-valuenow="${item.score_normalizado.toFixed(2)}" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar" style="width: ${item.score_normalizado.toFixed(2)}%;">${item.score_normalizado.toFixed(2)}</div>
-                        </div>
-                    </div>
-                </td>
-                <td>${item.score.toFixed(2)}</td>
-            </tr>
-        `;
-    });
-
-    tableHtml += `
-            </tbody>
-        </table>
-    `;
-    container.innerHTML = tableHtml;
-    showNotification("Cálculo de acessibilidade concluído!", "bi-check-circle-fill text-success");
 }

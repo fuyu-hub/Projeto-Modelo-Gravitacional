@@ -162,71 +162,23 @@
 
     <div id="dashboard-pane" class="content-pane">
          <h2 class="mb-4">Dashboard de Análise</h2>
-         <div id="dashboard-content" class="text-center text-muted pt-5">
-             <p>Execute uma análise para visualizar as métricas aqui.</p>
+         <div class="alert alert-info d-flex align-items-center" role="alert">
+             <i class="bi bi-tools fs-3 me-3"></i>
+             <div>
+                 Esta seção está em construção. Em breve, visualizações interativas dos resultados da análise estarão disponíveis aqui.
+             </div>
          </div>
-
-         <div id="dashboard-charts" class="mt-5">
-            <div class="row g-4">
-                <div class="col-12">
-                    <div id="cost-comparison-chart-container" class="card"></div>
-                </div>
-                 <div class="col-12">
-                    <div id="generation-attraction-chart-container" class="card"></div>
-                </div>
-                <div class="col-12">
-                    <div id="trip-distribution-histograms-container" class="card"></div>
-                </div>
-            </div>
          </div>
-    </div>
 
     <div id="analysis-tools-pane" class="content-pane">
         <h2 class="mb-4">Ferramentas de Análise</h2>
-        <div class="card mb-4">
-            <div class="card-header"><h5 class="mb-0"><i class="bi bi-compass me-2"></i>Índice de Acessibilidade</h5></div>
-            <div class="card-body">
-                <p class="card-subtitle text-body-secondary mb-3">Calcula o índice de acessibilidade para cada zona com base nos dados de entrada e nos parâmetros (α, β, γ) definidos na aba "Cenário Interativo".</p>
-                <button class="btn btn-primary" onclick="runAccessibilityAnalysis()">
-                    <i class="bi bi-calculator-fill me-2"></i>Calcular Acessibilidade
-                </button>
-                 <div id="accessibility-results-container" class="mt-4"></div>
+        <div class="alert alert-info d-flex align-items-center" role="alert">
+            <i class="bi bi-tools fs-3 me-3"></i>
+            <div>
+                Esta seção está em construção. Ferramentas adicionais para análise detalhada dos cenários estarão disponíveis em breve.
             </div>
         </div>
-        <div class="card mb-4">
-            <div class="card-header"><h5 class="mb-0"><i class="bi bi-arrows-fullscreen me-2"></i>Análise de Viagens Intrazonais</h5></div>
-            <div class="card-body">
-                <p class="card-subtitle text-body-secondary mb-3">Analisa a proporção de viagens que ocorrem dentro da mesma zona em relação às que ocorrem entre zonas diferentes para um cenário específico.</p>
-                <div class="input-group">
-                    <select class="form-select" id="intrazonal-scenario-select"></select>
-                    <button class="btn btn-primary" onclick="runIntrazonalAnalysis()"><i class="bi bi-pie-chart-fill me-2"></i>Analisar</button>
-                </div>
-                <div id="intrazonal-results-container" class="mt-4"></div>
-            </div>
         </div>
-        <div class="card">
-            <div class="card-header"><h5 class="mb-0"><i class="bi bi-subtract me-2"></i>Matriz de Diferença entre Cenários</h5></div>
-            <div class="card-body">
-                <p class="card-subtitle text-body-secondary mb-3">Compare dois cenários e visualize um mapa de calor com a diferença (absoluta ou percentual) no número de viagens entre eles.</p>
-                <div class="row g-3 align-items-center">
-                    <div class="col-md-4"><select class="form-select" id="diff-scenario-a-select" aria-label="Cenário A"></select></div>
-                    <div class="col-md-4"><select class="form-select" id="diff-scenario-b-select" aria-label="Cenário B"></select></div>
-                    <div class="col-md-4">
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="diff-type" id="diff-abs" value="absolute" checked>
-                            <label class="form-check-label" for="diff-abs">Absoluta</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="diff-type" id="diff-perc" value="percentage">
-                            <label class="form-check-label" for="diff-perc">Percentual (%)</label>
-                        </div>
-                    </div>
-                </div>
-                <button class="btn btn-primary mt-3 w-100" onclick="runScenarioDifferenceAnalysis()"><i class="bi bi-grid-3x3-gap-fill me-2"></i>Gerar Matriz de Diferença</button>
-                <div id="difference-heatmap-container" class="mt-4"></div>
-            </div>
-        </div>
-    </div>
 
     <div id="settings-pane" class="content-pane">
         <h2 class="mb-4">Configurações</h2>
