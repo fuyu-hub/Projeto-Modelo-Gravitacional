@@ -1,8 +1,46 @@
 [
-    {"alpha": 0.0, "beta": 0.0, "gamma": 0.0, "nome": "Caso 1 (Base)"},
-    {"alpha": 1.0, "beta": 1.0, "gamma": 1.0, "nome": "Caso 2 (Mesmo peso)"},
-    {"alpha": 2.0, "beta": 0.0, "gamma": 0.0, "nome": "Caso 3 (Foco em Tempo)"},
-    {"alpha": 0.0, "beta": 2.0, "gamma": 0.0, "nome": "Caso 4 (Foco em Distância)"},
-    {"alpha": 0.0, "beta": 0.0, "gamma": 2.0, "nome": "Caso 5 (Foco em Preço)"},
-    {"alpha": 2.0, "beta": 2.0, "gamma": 2.0, "nome": "Caso 6 (Sensibilidade Alta)"}
+  {
+    "nome": "Caso Base (Sem Impedância)",
+    "params": {}
+  },
+  {
+    "nome": "Exemplo: Foco Tempo",
+    "params": {
+      "Tempo": 2.0,
+      "Distancia": 0.0,
+      "Preco": 0.0
+    }
+  },
+  {
+    "nome": "Exemplo: Foco Distância",
+    "params": {
+      "Tempo": 0.0,
+      "Distancia": 2.0,
+      "Preco": 0.0
+    }
+  },
+  {
+    "nome": "Exemplo: Foco Preço",
+    "params": {
+      "Tempo": 0.0,
+      "Distancia": 0.0,
+      "Preco": 2.0
+    }
+  },
+  {
+    "nome": "Exemplo: Tempo e Distância",
+    "params": {
+      "Tempo": 1.0,
+      "Distancia": 1.0,
+      "Preco": 0.0
+    }
+  },
+  {
+    "nome": "Exemplo: Todos Iguais",
+    "params": {
+      "Tempo": 1.0,
+      "Distancia": 1.0,
+      "Preco": 1.0
+    }
+  }
 ]

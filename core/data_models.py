@@ -4,24 +4,15 @@ from typing import List, Dict, Any
 
 @dataclass
 class InputData:
-    """
-    Representa todos os dados de entrada necessários para executar o modelo.
-    Isto substitui os dicionários genéricos que eram lidos da GUI.
-    """
     zonas: List[str]
     o: np.ndarray
     d: np.ndarray
-    tempo: np.ndarray
-    distancia: np.ndarray
-    preco: np.ndarray
+    resistencias: Dict[str, np.ndarray]
 
 @dataclass
 class ScenarioResult:
-    """
-    Contém todos os resultados de um único cenário de análise.
-    """
     nome: str
-    parametros: Dict[str, float]
+    parametros: Dict[str, float] # Ex: {'Tempo': 1.0, 'Distancia': 0.5}
     matriz_viagens: np.ndarray
     metricas: Dict[str, Any] = field(default_factory=dict)
 

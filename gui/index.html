@@ -85,7 +85,7 @@
         </div>
         <div class="card">
              <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Matrizes de Dados</h5>
+                <h5 class="mb-0">Dados por Zona</h5>
                 <div>
                     <button class="btn btn-sm btn-outline-secondary" onclick="addZone()">+ Adicionar Zona</button>
                     <button class="btn btn-sm btn-outline-secondary" onclick="removeZone()">- Remover Zona</button>
@@ -94,12 +94,23 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-lg-4">
-                        <h6>Origens e Destinos</h6>
-                        <table class="table table-sm editable-table" id="od-table"></table>
+                        <h6>Origens (O) e Destinos (D)</h6>
+                        <table class="table table-sm editable-table" id="od-table">
+                            </table>
                     </div>
                     <div class="col-lg-8">
-                        <ul class="nav nav-tabs" id="cost-matrix-tabs" role="tablist"></ul>
-                        <div class="tab-content" id="cost-matrix-tabs-content"></div>
+                         <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6>Matrizes de Custo (Resistências)</h6>
+                            <button class="btn btn-sm btn-outline-primary" id="add-resistance-btn" onclick="addResistance()">
+                                <i class="bi bi-plus-lg me-1"></i> Adicionar Resistência
+                            </button>
+                        </div>
+                        <div id="dynamic-resistance-tabs-container">
+                            <ul class="nav nav-tabs" id="resistance-tabs" role="tablist">
+                                </ul>
+                        </div>
+                         <div class="tab-content pt-2" id="dynamic-resistance-content-container">
+                            </div>
                     </div>
                 </div>
             </div>
@@ -116,17 +127,27 @@
         <div class="card mb-4">
              <div class="card-header"><h5 class="mb-0">Comparativo de Cenários</h5></div>
             <div class="card-body">
-                <div id="summary-table-container" class="table-responsive"></div>
+                <div id="summary-table-container" class="table-responsive">
+                    <p class="text-center text-muted mt-3">Execute a análise para visualizar os resultados.</p>
+                </div>
             </div>
         </div>
         <div class="card">
             <div class="card-header"><h5 class="mb-0">Análise Detalhada por Cenário</h5></div>
             <div class="card-body">
-                <div id="scenario-nav-buttons" class="nav nav-pills mb-3"></div>
-                <div class="row mt-4 align-items-center">
-                    <div class="col-lg-8" id="results-heatmap-wrapper"></div>
-                    <div class="col-lg-4" id="metrics-container"></div>
-                </div>
+                 <div id="scenario-nav-buttons-container">
+                     <div id="scenario-nav-buttons" class="nav nav-pills mb-3">
+                         </div>
+                 </div>
+                 <div id="detailed-analysis-content" class="d-none"> {/* Escondido inicialmente */}
+                     <div class="row mt-4 align-items-center">
+                         <div class="col-lg-8" id="results-heatmap-wrapper">
+                             </div>
+                         <div class="col-lg-4" id="metrics-container">
+                             </div>
+                     </div>
+                 </div>
+                 <p id="detailed-analysis-placeholder" class="text-center text-muted mt-5">Execute a análise para visualizar os detalhes.</p>
             </div>
         </div>
     </div>
@@ -140,16 +161,15 @@
                     <div class="col-md-4">
                         <h6>Parâmetros de Sensibilidade</h6>
                         <hr/>
-                        <label for="alpha-slider" class="form-label">α (Alfa - Tempo): <span id="alpha-value">1.0</span></label>
-                        <input type="range" class="form-range" min="0" max="5" step="0.1" value="1.0" id="alpha-slider">
-                        <label for="beta-slider" class="form-label">β (Beta - Distância): <span id="beta-value">1.0</span></label>
-                        <input type="range" class="form-range" min="0" max="5" step="0.1" value="1.0" id="beta-slider">
-                        <label for="gamma-slider" class="form-label">γ (Gama - Preço): <span id="gamma-value">1.0</span></label>
-                        <input type="range" class="form-range" min="0" max="5" step="0.1" value="1.0" id="gamma-slider">
+                        <div id="dynamic-param-sliders-container">
+                             <p class="text-muted small">Carregue os dados de entrada para ativar os parâmetros.</p>
+                            </div>
                         <hr/>
-                        <div id="interactive-metrics"></div>
+                        <div id="interactive-metrics">
+                             <p class="text-center text-muted mt-3 small">Ajuste os parâmetros para ver as métricas.</p>
+                        </div>
                     </div>
-                    <div class="col-md-8">
+                     <div class="col-md-8">
                         <div id="interactive-heatmap">
                              <p class="text-center text-muted mt-5">Ajuste os parâmetros para visualizar o resultado.</p>
                         </div>
@@ -157,7 +177,12 @@
                 </div>
              </div>
         </div>
-        <div id="sensitivity-chart-container" class="card"></div>
+        <div id="sensitivity-chart-container" class="card">
+             <div class="card-header"><h5 class="mb-0">Histórico de Custos (Cenário Interativo)</h5></div>
+             <div class="card-body">
+                 <p class="text-center text-muted">Ajuste os parâmetros para gerar o histórico.</p>
+             </div>
+        </div>
     </div>
 
     <div id="dashboard-pane" class="content-pane">
@@ -165,20 +190,24 @@
          <div class="alert alert-info d-flex align-items-center" role="alert">
              <i class="bi bi-tools fs-3 me-3"></i>
              <div>
-                 Esta seção está em construção. Em breve, visualizações interativas dos resultados da análise estarão disponíveis aqui.
+                 Esta seção está em construção. Execute uma análise completa para visualizar dados preliminares aqui.
              </div>
          </div>
-         </div>
+         <div id="dashboard-content">
+              </div>
+    </div>
 
-    <div id="analysis-tools-pane" class="content-pane">
+     <div id="analysis-tools-pane" class="content-pane">
         <h2 class="mb-4">Ferramentas de Análise</h2>
         <div class="alert alert-info d-flex align-items-center" role="alert">
             <i class="bi bi-tools fs-3 me-3"></i>
             <div>
-                Esta seção está em construção. Ferramentas adicionais para análise detalhada dos cenários estarão disponíveis em breve.
+                Esta seção está em construção. Execute uma análise completa para habilitar as ferramentas disponíveis.
             </div>
         </div>
-        </div>
+         <div id="tools-content">
+             </div>
+    </div>
 
     <div id="settings-pane" class="content-pane">
         <h2 class="mb-4">Configurações</h2>
@@ -190,37 +219,37 @@
                     você executa uma nova análise ou um cenário interativo.
                 </p>
                 <div class="mb-3">
-                    <label for="max-iter-input" class="form-label">Número Máximo de Iterações</label>
-                    <input type="number" class="form-control" id="max-iter-input" value="200">
+                    <label for="max-iter-input" class="form-label">Número Máximo de Iterações (Furness)</label>
+                    <input type="number" class="form-control" id="max-iter-input" value="200" min="10">
                     <div class="form-text">Define o limite de iterações para o algoritmo de Furness convergir.</div>
                 </div>
                 <div class="mb-3">
-                    <label for="tolerance-input" class="form-label">Tolerância de Convergência</label>
-                    <input type="number" class="form-control" id="tolerance-input" step="0.0001" value="0.0005">
-                     <div class="form-text">Define o critério de parada baseado no erro relativo máximo entre as iterações.</div>
+                    <label for="tolerance-input" class="form-label">Tolerância de Convergência (Furness)</label>
+                    <input type="number" class="form-control" id="tolerance-input" step="0.0001" value="0.0005" min="0.00001" max="0.1">
+                     <div class="form-text">Critério de parada baseado no erro relativo máximo entre iterações (ex: 0.0005 = 0.05%).</div>
                 </div>
                 <div class="p-3 border rounded mb-3">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="intrazonal-switch" checked>
                         <label class="form-check-label" for="intrazonal-switch">Permitir Viagens Intrazonais (Diagonal da Matriz)</label>
                     </div>
-                    <div class="form-text ps-1">Se desativado, o modelo atribui uma impedância infinita às viagens que começam e terminam na mesma zona.</div>
+                    <div class="form-text ps-1">Se desativado, o modelo atribui impedância infinita às viagens que começam e terminam na mesma zona.</div>
                 </div>
                 <div class="mb-3 p-3 border rounded">
                     <label class="form-label">Função de Impedância</label>
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="impedanceFunction" id="func-potencia" value="potencia" checked>
                         <label class="form-check-label" for="func-potencia">
-                            Potência: <code>1 / (t<sup>α</sup> * d<sup>β</sup> * p<sup>γ</sup>)</code>
+                            Potência: <code>1 / (C1<sup>p1</sup> * C2<sup>p2</sup> * ...)</code>
                         </label>
                     </div>
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="impedanceFunction" id="func-exponencial" value="exponencial">
                         <label class="form-check-label" for="func-exponencial">
-                            Exponencial: <code>1 / e<sup>(α*t + β*d + γ*p)</sup></code>
+                            Exponencial: <code>1 / e<sup>(p1*C1 + p2*C2 + ...)</sup></code>
                         </label>
                     </div>
-                    <div class="form-text">Define a fórmula matemática para calcular a resistência entre as zonas. α, β e γ são os pesos definidos nos cenários.</div>
+                    <div class="form-text">Define a fórmula para calcular a resistência entre zonas. C1, C2... são os custos (resistências) e p1, p2... são os parâmetros definidos nos cenários ou sliders.</div>
                 </div>
             </div>
         </div>
@@ -230,10 +259,10 @@
         <div class="card">
             <div class="card-header"><h2 class="mb-0">Sobre o Projeto</h2></div>
             <div class="card-body p-4">
-                <p class="lead">Esta aplicação implementa o Modelo Gravitacional de Alocação de Viagens, utilizando o método de Fator Duplo (Doubly Constrained).</p>
+                <p class="lead">Esta aplicação implementa o Modelo Gravitacional de Alocação de Viagens, utilizando o método de Fator Duplo (Doubly Constrained) e permitindo múltiplos fatores de resistência.</p>
                 <hr class="my-4">
                 <h5>Metodologia</h5>
-                <p>O modelo estima uma matriz Origem-Destino (OD) com base na atratividade entre zonas, que é proporcional à sua capacidade de geração e atração, e inversamente proporcional a uma função de impedância (custos de tempo, distância e preço).</p>
+                <p>O modelo estima uma matriz Origem-Destino (OD) com base na atratividade entre zonas, que é proporcional à sua capacidade de geração e atração, e inversamente proporcional a uma função de impedância configurável (baseada nos custos definidos pelo utilizador).</p>
                 <h5>Autores</h5><p>Danilo Ferreira e Samuel Sousa</p>
                 <h5>Disciplina</h5><p>Análise e Planejamento de Sistema de Transportes</p>
             </div>
@@ -242,7 +271,5 @@
 </main>
 
 <script src="assets/bootstrap.bundle.min.js"></script>
-<script src="js/main.js"></script>
-
-</body>
+<script src="js/main.js"></script> </body>
 </html>

@@ -8,13 +8,8 @@ Autores: Danilo Ferreira e Samuel Sousa
 import webview
 import os
 import sys
-# import json # Não é mais necessário para as configurações da janela
 from api import Api
 
-# SETTINGS_FILE = 'gui_settings.json' # Removido
-
-# def load_settings() -> dict: # Removido
-#     ...
 
 def resource_path(relative_path: str) -> str:
     """ Obtém o caminho absoluto para o recurso. """
